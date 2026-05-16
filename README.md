@@ -39,7 +39,114 @@ Reinforcement learning KBO
 - [S3] Provided search result: *"MYKBO Scraping (GitHub): Scrapy-based project for scraping full KBO game data, with Kafka/MariaDB integration."*
 - [S4] Provided search result: *"KBO Data Portal Organization (GitHub): Includes collector, pipeline, and API-server repositories for KBO data ingestion and access."*
 
-## B. Python Script to Download Last 5 Years of KBO Data
+## B. Data Schemas
+
+Files are written to `data/kbo/<year>/<table>.csv` (or `.parquet`). The `people` table has no year column and is written to `data/kbo/all/people.csv`.
+
+### box-scores / batting (identical schema)
+
+| Column | Type | Description |
+| ------ | ---- | ----------- |
+| `kbobID` | int | KBO batting record ID |
+| `playerID` | int | Player identifier (join key to `people`) |
+| `yearID` | int | Season year |
+| `stint` | int | Stint number within season |
+| `lgID` | str | League ID (always `KBO`) |
+| `teamID` | str | Team abbreviation |
+| `G` | int | Games played |
+| `AB` | int | At-bats |
+| `R` | int | Runs scored |
+| `H` | int | Hits |
+| `2B` | int | Doubles |
+| `3B` | int | Triples |
+| `HR` | int | Home runs |
+| `RBI` | int | Runs batted in |
+| `SB` | int | Stolen bases |
+| `CS` | int | Caught stealing |
+| `BB` | int | Walks |
+| `SO` | int | Strikeouts |
+| `GIDP` | int | Grounded into double plays |
+| `AVG` | str | Batting average |
+| `SLG` | str | Slugging percentage |
+| `OBP` | str | On-base percentage |
+| `PA` | int | Plate appearances |
+| `TB` | int | Total bases |
+
+### pitching
+
+| Column | Type | Description |
+| ------ | ---- | ----------- |
+| `kbopID` | int | KBO pitching record ID |
+| `playerID` | int | Player identifier (join key to `people`) |
+| `yearID` | int | Season year |
+| `stint` | int | Stint number within season |
+| `lgID` | str | League ID (always `KBO`) |
+| `teamID` | str | Team abbreviation |
+| `G` | int | Games pitched |
+| `CG` | int | Complete games |
+| `SHO` | int | Shutouts |
+| `W` | int | Wins |
+| `L` | int | Losses |
+| `SV` | int | Saves |
+| `HLD` | int | Holds |
+| `WPCT` | str | Winning percentage |
+| `BFP` | int | Batters faced |
+| `IPouts` | int | Innings pitched × 3 (outs recorded) |
+| `H` | int | Hits allowed |
+| `HR` | int | Home runs allowed |
+| `BB` | int | Walks allowed |
+| `HBP` | int | Hit batters |
+| `SO` | int | Strikeouts |
+| `R` | int | Runs allowed |
+| `ER` | int | Earned runs allowed |
+| `ERA` | str | Earned run average |
+
+### fielding
+
+| Column | Type | Description |
+| ------ | ---- | ----------- |
+| `kbofID` | int | KBO fielding record ID |
+| `playerID` | int | Player identifier (join key to `people`) |
+| `yearID` | int | Season year |
+| `stint` | int | Stint number within season |
+| `lgID` | str | League ID (always `KBO`) |
+| `teamID` | str | Team abbreviation |
+| `POS` | str | Position (e.g. `P`, `C`, `1B`, `SS`, `OF`) |
+| `G` | int | Games played at position |
+| `GS` | int | Games started at position |
+| `InnOuts` | int | Innings played × 3 (outs) |
+| `E` | int | Errors |
+| `PKO` | int | Pickoff outs |
+| `PO` | int | Putouts |
+| `A` | int | Assists |
+| `DP` | int | Double plays |
+| `FPCT` | str | Fielding percentage |
+| `PB` | int | Passed balls (catchers only) |
+| `SB` | int | Stolen bases allowed (catchers only) |
+| `CS` | int | Runners caught stealing (catchers only) |
+| `CS_pct` | str | Caught-stealing percentage (catchers only; `-` when not applicable) |
+
+### people (`data/kbo/all/people.csv`)
+
+| Column | Type | Description |
+| ------ | ---- | ----------- |
+| `playerID` | int | Player identifier (primary key) |
+| `birthYear` | int | Birth year |
+| `birthMonth` | int | Birth month |
+| `birthDay` | int | Birth day |
+| `nationality` | str | Player nationality |
+| `nameLast` | str | Last name (romanized) |
+| `nameFirst` | str | First name (romanized) |
+| `nameGiven` | str | Full name (romanized) |
+| `weight` | int | Weight in pounds |
+| `height` | int | Height in inches |
+| `bats` | str | Batting handedness (`R`, `L`, `B`) |
+| `throws` | str | Throwing handedness (`R`, `L`) |
+| `position` | str | Primary position (nullable; 503 nulls in full dataset) |
+
+---
+
+## C. Python Script to Download Last 5 Years of KBO Data
 
 A complete script is available at:
 
@@ -65,6 +172,7 @@ A single PowerShell script handles the entire setup-and-download workflow on bot
 ```
 
 The script will:
+
 1. Detect a suitable `python` / `python3` interpreter on your `PATH`.
 2. Create (or reuse) a `.venv` virtual environment in the repository root.
 3. Install all dependencies listed in `requirements.txt`.

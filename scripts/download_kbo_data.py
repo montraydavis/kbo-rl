@@ -14,6 +14,8 @@ DataFrame = Any
 Loader = Callable[[], DataFrame]
 
 YEAR_COLUMNS: Tuple[str, ...] = (
+    "yearID",
+    "year_id",
     "year",
     "season",
     "Season",
@@ -21,21 +23,37 @@ YEAR_COLUMNS: Tuple[str, ...] = (
     "SEASON",
 )
 
+DATASET_FILENAMES: Dict[str, str] = {
+    "batting": "box-scores",
+    "pitching": "pitching",
+    "fielding": "fielding",
+    "people": "people",
+}
+
 
 def build_dataset_loaders() -> Dict[str, Loader]:
     """Import nk-datasets loaders at runtime."""
     # Import lazily so --help works even when dependencies are not yet installed.
     try:
-        from nk_datasets import (
+        from nk_datasets import (  # type: ignore[import-not-found]
             load_kbo_batting,
             load_kbo_fielding,
             load_kbo_people,
             load_kbo_pitching,
         )
     except ImportError as exc:
-        raise RuntimeError(
-            "nk-datasets is required. Install it with `pip install nk-datasets`."
-        ) from exc
+        try:
+            # nk-datasets 0.1.x publishes loaders under the "nk" module name.
+            from nk import (  # type: ignore[import-not-found]
+                load_kbo_batting,
+                load_kbo_fielding,
+                load_kbo_people,
+                load_kbo_pitching,
+            )
+        except ImportError:
+            raise RuntimeError(
+                "nk-datasets is required. Install it with `pip install nk-datasets`."
+            ) from exc
 
     return {
         "batting": load_kbo_batting,
@@ -80,6 +98,7 @@ def filter_for_year(df: DataFrame, year_column: str, year: int) -> DataFrame:
 
 def write_frame(df: DataFrame, output_path: Path, file_format: str) -> None:
     """Persist a DataFrame in the selected format."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     if file_format == "csv":
         df.to_csv(output_path, index=False)
     elif file_format == "parquet":
@@ -104,6 +123,8 @@ def process_dataset(
         logging.exception("Failed to load '%s': %s", dataset_name, exc)
         return
 
+    output_name = DATASET_FILENAMES.get(dataset_name, dataset_name)
+
     year_column = find_year_column(frame)
     if year_column is None:
         # Fallback path when schema does not expose a recognizable season column.
@@ -112,7 +133,7 @@ def process_dataset(
             dataset_name,
         )
         extension = "csv" if file_format == "csv" else "parquet"
-        output_path = output_dir / f"kbo_{dataset_name}_all_years.{extension}"
+        output_path = output_dir / "all" / f"{output_name}.{extension}"
         write_frame(frame, output_path, file_format)
         logging.info("Saved %s rows to %s", len(frame), output_path)
         return
@@ -125,7 +146,7 @@ def process_dataset(
             continue
 
         extension = "csv" if file_format == "csv" else "parquet"
-        output_path = output_dir / f"kbo_{dataset_name}_{year}.{extension}"
+        output_path = output_dir / str(year) / f"{output_name}.{extension}"
         write_frame(year_frame, output_path, file_format)
         logging.info("Saved %s rows to %s", len(year_frame), output_path)
 

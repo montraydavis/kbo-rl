@@ -43,7 +43,7 @@ Reinforcement learning KBO
 
 A complete script is available at:
 
-- `/home/runner/work/kbo-rl/kbo-rl/scripts/download_kbo_data.py`
+- `scripts/download_kbo_data.py`
 
 It uses `nk-datasets` loaders (`load_kbo_batting`, `load_kbo_pitching`, `load_kbo_fielding`, `load_kbo_people`) and saves data by season for the most recent 5 years by default.
 
@@ -60,17 +60,17 @@ It uses `nk-datasets` loaders (`load_kbo_batting`, `load_kbo_pitching`, `load_kb
 2. Run with default range (last 5 complete seasons, CSV output):
 
    ```bash
-   python /home/runner/work/kbo-rl/kbo-rl/scripts/download_kbo_data.py
+   python scripts/download_kbo_data.py
    ```
 
 3. Run with custom years and Parquet output:
 
    ```bash
-   python /home/runner/work/kbo-rl/kbo-rl/scripts/download_kbo_data.py \
+   python scripts/download_kbo_data.py \
      --start-year 2021 \
      --end-year 2025 \
      --format parquet \
-     --output-dir /home/runner/work/kbo-rl/kbo-rl/data/kbo
+     --output-dir data/kbo
    ```
 
 4. Modify the year range:

@@ -107,7 +107,7 @@ if (Test-Path (Join-Path $VenvDir 'pyvenv.cfg')) {
 # ---------------------------------------------------------------------------
 # 4. Resolve the venv's Python / pip executables (cross-platform)
 # ---------------------------------------------------------------------------
-if ($IsWindows -or ($PSVersionTable.PSVersion.Major -lt 6)) {
+if (($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows) {
     $VenvPython = Join-Path $VenvDir 'Scripts\python.exe'
     $VenvPip    = Join-Path $VenvDir 'Scripts\pip.exe'
 } else {

@@ -75,7 +75,7 @@ def compute_year_range(start_year: Optional[int], end_year: Optional[int]) -> li
     """Return a 5-year window when explicit bounds are not provided."""
     default_end = datetime.now(timezone.utc).year - 1
     final_end = end_year if end_year is not None else default_end
-    final_start = start_year if start_year is not None else final_end - 4
+    final_start = start_year if start_year is not None else final_end - 19
 
     if final_start > final_end:
         raise ValueError("start-year must be less than or equal to end-year")

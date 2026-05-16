@@ -49,13 +49,40 @@ It uses `nk-datasets` loaders (`load_kbo_batting`, `load_kbo_pitching`, `load_kb
 
 ## C. Usage Instructions
 
+### Quick start (PowerShell — recommended)
+
+A single PowerShell script handles the entire setup-and-download workflow on both Windows and Linux/macOS:
+
+```powershell
+# Default: last 5 complete seasons, CSV output, saved to data/kbo
+.\scripts\setup_and_download.ps1
+
+# Custom year range, parquet format
+.\scripts\setup_and_download.ps1 -StartYear 2021 -EndYear 2025 -Format parquet -OutputDir data/kbo
+
+# Enable verbose/debug output
+.\scripts\setup_and_download.ps1 -Verbose
+```
+
+The script will:
+1. Detect a suitable `python` / `python3` interpreter on your `PATH`.
+2. Create (or reuse) a `.venv` virtual environment in the repository root.
+3. Install all dependencies listed in `requirements.txt`.
+4. Run `scripts/download_kbo_data.py` and save the data files to `--OutputDir`.
+
+> **Prerequisite:** PowerShell 5.1+ (Windows) or [PowerShell 7+](https://aka.ms/powershell) (cross-platform). Python 3.9+ must be installed and on your `PATH`.
+
+---
+
+### Manual setup (shell / bash)
+
 1. Install dependencies:
 
    ```bash
-   pip install nk-datasets pandas pyarrow
+   pip install -r requirements.txt
    ```
 
-   > `pyarrow` is only required for `--format parquet`.
+   > `pyarrow` (listed in `requirements.txt`) is needed only for `--format parquet`.
 
 2. Run with default range (last 5 complete seasons, CSV output):
 
